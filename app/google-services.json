@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "290708056815",
+    "firebase_url": "https://thesis-e50c5.firebaseio.com",
+    "project_id": "thesis-e50c5",
+    "storage_bucket": "thesis-e50c5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290708056815:android:f42396ec117964db",
+        "android_client_info": {
+          "package_name": "com.example.quade_laptop.coachcountry"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "290708056815-rsed3climf10srobc7s6ojtv4uo8f6k3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.quade_laptop.coachcountry",
+            "certificate_hash": "28fcfd9feaf047897ad24ed1a9ad5c80a1c0efdb"
+          }
+        },
+        {
+          "client_id": "290708056815-it9v86r81419qdeballr3p5llobace5c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjHDQ3vuw2QP6S8qXJpzqLKFlpYSoGmyQ"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "290708056815-it9v86r81419qdeballr3p5llobace5c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
