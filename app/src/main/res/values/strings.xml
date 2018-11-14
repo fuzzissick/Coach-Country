@@ -15,4 +15,19 @@
     </string>
 
     <string name="welcome_sign_in">"Welcome To Coach Country"</string>
+
+    <string-array name="years">
+        <item>Freshman</item>
+        <item>Sophomore</item>
+        <item>Junior</item>
+        <item>Senior</item>
+    </string-array>
+
+    <string-array name="events">
+        <item>Short Sprints</item>
+        <item>Long Sprints</item>
+        <item>Mid Distance</item>
+        <item>Long Distance</item>
+    </string-array>
+
 </resources>

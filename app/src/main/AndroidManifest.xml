@@ -21,11 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity
             android:name=".CoachCountrySignIn"
-            android:label="@string/title_activity_coach_country_sign_in">
-</activity>
+            android:label="@string/title_activity_coach_country_sign_in"></activity>
+        <activity android:name=".CoachCountryUserRegistration"></activity>
     </application>
 
 </manifest>

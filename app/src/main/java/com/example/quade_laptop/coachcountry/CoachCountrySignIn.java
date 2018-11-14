@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,6 +38,12 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
     private GoogleApiClient mGoogleApiClient;
     private FirebaseAuth mFirebaseAuth;
 
+    //sign in
+    private Button EmailSignIn;
+    private EditText editTextEmail;
+    private EditText editTextPassword;
+    private Button registerUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,9 +51,15 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
 
         // Assign fields
         mSignInButton =  (SignInButton) findViewById(R.id.google_sign_in);
+        editTextEmail = (EditText) findViewById(R.id.sign_in_email);
+        editTextPassword = (EditText) findViewById(R.id.sign_in_password);
+        EmailSignIn = (Button) findViewById(R.id.sign_in_submit);
+        registerUser = (Button) findViewById(R.id.register_user);
 
         // Set click listeners
         mSignInButton.setOnClickListener(this);
+        EmailSignIn.setOnClickListener(this);
+        registerUser.setOnClickListener(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
@@ -78,6 +91,12 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
             case R.id.google_sign_in:
                 signIn();
                 break;
+            case R.id.sign_in_submit:
+                signInEmail();
+                break;
+            case R.id.register_user:
+                registerUser();
+                break;
             default:
                 return;
         }
@@ -86,6 +105,47 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+
+    private void signInEmail(){
+        String email = editTextEmail.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+
+        //Check if fields are not empty
+        if(TextUtils.isEmpty(email)){
+            Toast.makeText(this,"Please enter Email", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(TextUtils.isEmpty(password)){
+            Toast.makeText(this,"Please enter Email", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+
+    }
+
+
+    private void registerUser(){
+        String email = editTextEmail.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+
+        //Check if fields are not empty
+        if(TextUtils.isEmpty(email)){
+            Toast.makeText(this,"Please enter Email", Toast.LENGTH_LONG).show();
+            return;
+        }
+        if(TextUtils.isEmpty(password)){
+            Toast.makeText(this,"Please enter Email", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        //if fields are not empty
+
+        Intent registerUserIntent = new Intent(this, CoachCountryUserRegistration.class);
+        registerUserIntent.putExtra("username", email);
+        registerUserIntent.putExtra("password", password);
+        startActivityForResult(registerUserIntent, RC_SIGN_IN);
     }
 
     @Override
