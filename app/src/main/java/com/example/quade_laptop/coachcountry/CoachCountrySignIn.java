@@ -11,6 +11,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.firebase.ui.auth.AuthUI;
+import com.firebase.ui.auth.ErrorCodes;
+import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -26,7 +29,11 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.FirebaseUserMetadata;
 import com.google.firebase.auth.GoogleAuthProvider;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
@@ -47,32 +54,20 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_coach_country_sign_in);
+        List<AuthUI.IdpConfig> providers = Arrays.asList(
+                new AuthUI.IdpConfig.EmailBuilder().build(),
+                new AuthUI.IdpConfig.GoogleBuilder().build());
 
-        // Assign fields
-        mSignInButton =  (SignInButton) findViewById(R.id.google_sign_in);
-        editTextEmail = (EditText) findViewById(R.id.sign_in_email);
-        editTextPassword = (EditText) findViewById(R.id.sign_in_password);
-        EmailSignIn = (Button) findViewById(R.id.sign_in_submit);
-        registerUser = (Button) findViewById(R.id.register_user);
-
-        // Set click listeners
-        mSignInButton.setOnClickListener(this);
-        EmailSignIn.setOnClickListener(this);
-        registerUser.setOnClickListener(this);
-
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this /* FragmentActivity */, this /* OnConnectionFailedListener */)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
-        // Initialize FirebaseAuth
-        mFirebaseAuth = FirebaseAuth.getInstance();
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .build(),
+                RC_SIGN_IN);
     }
+
+
+
 
     private void handleFirebaseAuthResult(AuthResult authResult) {
         if (authResult != null) {
@@ -145,49 +140,48 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
         Intent registerUserIntent = new Intent(this, CoachCountryUserRegistration.class);
         registerUserIntent.putExtra("username", email);
         registerUserIntent.putExtra("password", password);
+        registerUserIntent.putExtra("isGoogle", "false");
         startActivityForResult(registerUserIntent, RC_SIGN_IN);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        super.onActivityResult(requestCode, resultCode, data);
+        // RC_SIGN_IN is the request code you passed into startActivityForResult(...) when starting the sign in flow.
         if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
-                GoogleSignInAccount account = result.getSignInAccount();
-                firebaseAuthWithGoogle(account);
+            IdpResponse response = IdpResponse.fromResultIntent(data);
+
+            // Successfully signed in
+            if (resultCode == RESULT_OK) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                FirebaseUserMetadata metadata = user.getMetadata();
+                if (metadata.getCreationTimestamp() == metadata.getLastSignInTimestamp()) {
+                    Intent registerUserIntent = new Intent(this, CoachCountryUserRegistration.class);
+                    registerUserIntent.putExtra("username", user.getEmail());
+                    registerUserIntent.putExtra("UID", user.getUid());
+                    startActivityForResult(registerUserIntent, RC_SIGN_IN);
+                } else {
+                    startActivity(new Intent(this, MainActivity.class));
+                }
+                finish();
             } else {
-                // Google Sign In failed
-                Log.e(TAG, "Google Sign In failed.");
+                // Sign in failed
+                if (response == null) {
+                    // User pressed back button
+                    Toast.makeText(this, "Sign in Failed" + response.getError(), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
+                    Toast.makeText(this, "Sign in Failed: No Internet Connection ", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                Toast.makeText(this, "Sign in Failed" + response.getError(), Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Sign-in error: ", response.getError());
             }
         }
-    }
-
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mFirebaseAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
-
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
-                        if (!task.isSuccessful()) {
-                            Log.w(TAG, "signInWithCredential", task.getException());
-                            Toast.makeText(CoachCountrySignIn.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        } else {
-                            startActivity(new Intent(CoachCountrySignIn.this, MainActivity.class));
-                            finish();
-                        }
-                    }
-                });
     }
 
     @Override
