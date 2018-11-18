@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -17,15 +19,21 @@ import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.model.Document;
 import com.google.firebase.functions.FirebaseFunctions;
 
 
@@ -40,10 +48,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private SharedPreferences mSharedPreferences;
     private GoogleApiClient mGoogleApiClient;
 
+    private static String forecastDaysNum = "3";
+    String city = "Kenosha, WI";
+
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private FirebaseFunctions mFunctions;
+
+    private TextView coachField;
+    private TextView statusField;
 
     public static final String ANONYMOUS = "anonymous";
 
@@ -71,12 +85,51 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
             }
         }
-        mFunctions = FirebaseFunctions.getInstance();
+
+        //Init toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+        // init firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference user = db.collection("runners").document(mFirebaseUser.getUid().toString());
 
+        // init textfield for coach and stauts of couch
+        coachField = (TextView) findViewById(R.id.coachField);
+        statusField = (TextView) findViewById(R.id.statusField);
 
-        testFirestore();
+        final DocumentReference docRef = db.collection("coaches").document("C7NDyN2jFgYE3dtWwYzq0d1EnBM2");
+
+        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    DocumentSnapshot coach = task.getResult();
+                    String firstName = coach.get("firstName").toString();
+                    String lastName = coach.get("lastName").toString();
+
+                    coachField.setText(firstName + " " + lastName);
+                }
+            }
+        });
+
+        docRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot snapshot,
+                                @Nullable FirebaseFirestoreException e) {
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e);
+                    return;
+                }
+
+                if (snapshot != null && snapshot.exists()) {
+                    statusField.setText(snapshot.get("status").toString());
+                } else {
+                    Log.d(TAG, "Current data: null");
+                }
+            }
+        });
     }
 
     @Override
@@ -91,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         switch (item.getItemId()) {
             case R.id.sign_out:
                 mFirebaseAuth.signOut();
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient);
                 mUsername = ANONYMOUS;
                 startActivity(new Intent(this, CoachCountrySignIn.class));
                 finish();
