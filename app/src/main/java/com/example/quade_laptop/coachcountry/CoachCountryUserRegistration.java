@@ -138,6 +138,7 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
                                     public void onSuccess(Void aVoid) {
                                         Log.d(TAG, "Successfully wrote new runner!");
                                         startActivity(new Intent(CoachCountryUserRegistration.this, MainActivity.class));
+                                        finish();
                                     }
                                 })
                                 .addOnFailureListener(new OnFailureListener() {

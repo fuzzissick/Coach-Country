@@ -64,6 +64,7 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
                         .setAvailableProviders(providers)
                         .build(),
                 RC_SIGN_IN);
+        finish();
     }
 
 

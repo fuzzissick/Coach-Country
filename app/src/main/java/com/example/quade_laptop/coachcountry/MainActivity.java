@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +60,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
     private TextView coachField;
     private TextView statusField;
+    private Button startSession;
 
     public static final String ANONYMOUS = "anonymous";
 
@@ -97,6 +100,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // init textfield for coach and stauts of couch
         coachField = (TextView) findViewById(R.id.coachField);
         statusField = (TextView) findViewById(R.id.statusField);
+        startSession = (Button) findViewById(R.id.startSession);
+
+        startSession.setOnClickListener(startSessionHandler);
 
         final DocumentReference docRef = db.collection("coaches").document("C7NDyN2jFgYE3dtWwYzq0d1EnBM2");
 
@@ -131,6 +137,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
             }
         });
     }
+    View.OnClickListener startSessionHandler = new View.OnClickListener() {
+        public void onClick(View v) {
+            startActivity(new Intent(MainActivity.this, CoachCountySessionActivity.class));
+            finish();
+        }
+    };
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

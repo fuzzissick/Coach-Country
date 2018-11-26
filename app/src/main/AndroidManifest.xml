@@ -6,8 +6,12 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
+
 
     <application
         android:allowBackup="true"
@@ -25,8 +29,18 @@
         </activity>
         <activity
             android:name=".CoachCountrySignIn"
-            android:label="@string/title_activity_coach_country_sign_in"></activity>
-        <activity android:name=".CoachCountryUserRegistration"></activity>
+            android:label="@string/title_activity_coach_country_sign_in" />
+        <activity android:name=".CoachCountryUserRegistration" />
+        <activity android:name=".CoachCountySessionActivity"></activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDMXr9mNO0gxTqOFmpU9inSUnP-ZvI0f3U"/>
+
+        <service android:name=".GPSService" />
+
     </application>
+
+
 
 </manifest>
