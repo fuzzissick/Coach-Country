@@ -70,7 +70,7 @@ public class GPSService extends Service {
         locationManager = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
 
         //noinspection MissingPermission
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,20000,0,listener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,5000,0,listener);
 
     }
 

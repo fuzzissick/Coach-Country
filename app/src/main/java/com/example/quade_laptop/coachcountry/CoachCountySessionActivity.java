@@ -1,11 +1,15 @@
 package com.example.quade_laptop.coachcountry;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Build;
@@ -22,6 +26,7 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.fitness.Fitness;
@@ -74,6 +79,10 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
     private Pace currentPace;
     private Double distanceTraveled;
 
+    private NotificationManager mNotific;
+    private int imp;
+    final String ChannelID="CCChannel";
+
     private BroadcastReceiver broadcastReceiver;
 
 
@@ -87,6 +96,9 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
         pace = findViewById(R.id.paceField);
         distance = findViewById(R.id.distanceField);
         distanceTraveled = 0.0;
+
+        mNotific = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        imp = NotificationManager.IMPORTANCE_HIGH;
 
         currentPace = new Pace(0,0);
         runningFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -168,6 +180,13 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
 
             }
         });
+
+        stopWorkout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
     }
 
     @Override
@@ -203,11 +222,15 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                     if(intent.getExtras().get("distance") != null) {
                         Log.d(TAG, intent.getExtras().get("distance").toString());
                         Double paceVal = Pace.calculatePace(Double.parseDouble(intent.getExtras().get("distance").toString()),currentTime,previousTime);
+                        Double prevDist = distanceTraveled;
                         distanceTraveled = (distanceTraveled) + (Double.parseDouble(intent.getExtras().get("distance").toString()) * 0.00062137);
-                        distance.setText((new DecimalFormat("$#.00").format(distanceTraveled)));
-                        currentPace.setMinute((int)Math.round(paceVal));
-                        currentPace.setSeconds((int)(paceVal - currentPace.getMinute()) * 60);
-                        pace.setText(currentPace.getMinute() + ":" + currentPace.getSeconds());
+                        if(Math.floor(distanceTraveled) > Math.floor(prevDist)) {
+                            Toast.makeText(context, "You ran " + (new DecimalFormat("#.00mi").format(distanceTraveled)), Toast.LENGTH_LONG).show();
+                        }
+                        distance.setText((new DecimalFormat("#.00mi").format(distanceTraveled)));
+                        currentPace.setMinute((int)Math.floor(paceVal));
+                        currentPace.setSeconds((int)Math.round(((paceVal - currentPace.getMinute()) * 60)));
+                        pace.setText(currentPace.getPaceString());
                     }
                     drawRoute(newPoint);
                 }

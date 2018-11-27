@@ -13,6 +13,15 @@ public class Pace {
         return seconds;
     }
 
+    public String getPaceString(){
+        String retval = Integer.toString(minute) + ":";
+        if(seconds < 10)
+            retval = retval + "0";
+        retval = retval + Integer.toString(seconds);
+
+        return retval;
+    }
+
 
     public void setMinute(int minute) {
         this.minute = minute;
