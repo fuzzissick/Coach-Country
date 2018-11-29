@@ -1,5 +1,7 @@
 package com.example.quade_laptop.coachcountry;
 
+import java.util.List;
+
 public class Pace {
 
     private int seconds;
@@ -13,9 +15,9 @@ public class Pace {
         return seconds;
     }
 
-    public String getPaceString(){
+    public String getPaceString() {
         String retval = Integer.toString(minute) + ":";
-        if(seconds < 10)
+        if (seconds < 10)
             retval = retval + "0";
         retval = retval + Integer.toString(seconds);
 
@@ -31,16 +33,27 @@ public class Pace {
         this.seconds = seconds;
     }
 
-    Pace(int minute, int seconds){
+    Pace(int minute, int seconds) {
         this.minute = minute;
         this.seconds = seconds;
     }
 
-    public static Double calculatePace(Double distance, long currentTime, long previousTime){
-        Double timeInHour = ((currentTime - previousTime)/1000.0)/3600.0;
-        Double inMiles = distance/1609.344;
-        Double mph = inMiles/timeInHour;
-        Double pace = 60/mph;
+    public static Double calculatePace(Double distance, long currentTime, long previousTime) {
+        Double timeInHour = ((currentTime - previousTime) / 1000.0) / 3600.0;
+        Double inMiles = distance / 1609.344;
+        Double mph = inMiles / timeInHour;
+        Double pace = 60 / mph;
         return pace;
+    }
+
+    public static Pace calculateAveragePace(List<Double> paces) {
+        Double runningPace = 0.0;
+        for (Double pace : paces) {
+            runningPace += pace;
+        }
+        Double d = new Double(paces.size());
+        runningPace = runningPace / d;
+        Pace retval = new Pace((int) Math.floor(runningPace), (int) Math.round(((runningPace - (int) Math.floor(runningPace)) * 60)));
+        return retval;
     }
 }

@@ -12,7 +12,6 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_MOCK_LOCATION" />
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -31,16 +30,15 @@
             android:name=".CoachCountrySignIn"
             android:label="@string/title_activity_coach_country_sign_in" />
         <activity android:name=".CoachCountryUserRegistration" />
-        <activity android:name=".CoachCountySessionActivity"></activity>
+        <activity android:name=".CoachCountySessionActivity" />
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDMXr9mNO0gxTqOFmpU9inSUnP-ZvI0f3U"/>
+            android:value="AIzaSyDMXr9mNO0gxTqOFmpU9inSUnP-ZvI0f3U" />
 
         <service android:name=".GPSService" />
 
+        <activity android:name=".SessionSummary"></activity>
     </application>
-
-
 
 </manifest>

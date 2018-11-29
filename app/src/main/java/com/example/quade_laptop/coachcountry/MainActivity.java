@@ -67,9 +67,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         // Set default username is anonymous.
         mUsername = ANONYMOUS;
 
@@ -94,15 +92,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         setSupportActionBar(myToolbar);
 
         // init firestore
+
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         DocumentReference user = db.collection("runners").document(mFirebaseUser.getUid().toString());
-
-        // init textfield for coach and stauts of couch
-        coachField = (TextView) findViewById(R.id.coachField);
-        statusField = (TextView) findViewById(R.id.statusField);
-        startSession = (Button) findViewById(R.id.startSession);
-
-        startSession.setOnClickListener(startSessionHandler);
 
         final DocumentReference docRef = db.collection("coaches").document("C7NDyN2jFgYE3dtWwYzq0d1EnBM2");
 
@@ -136,6 +128,21 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
             }
         });
+
+        setContentView(R.layout.activity_main);
+
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+
+
+        // init textfield for coach and stauts of couch
+        coachField = (TextView) findViewById(R.id.coachField);
+        statusField = (TextView) findViewById(R.id.statusField);
+        startSession = (Button) findViewById(R.id.startSession);
+
+        startSession.setOnClickListener(startSessionHandler);
+
+
     }
     View.OnClickListener startSessionHandler = new View.OnClickListener() {
         public void onClick(View v) {

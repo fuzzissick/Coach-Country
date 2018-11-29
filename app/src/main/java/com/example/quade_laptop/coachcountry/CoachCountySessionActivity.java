@@ -41,7 +41,19 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.model.Document;
 import com.google.maps.android.SphericalUtil;
 
 import java.text.DecimalFormat;
@@ -69,19 +81,26 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
     private SupportMapFragment runningFragment;
     private TextView pace;
     private TextView distance;
+    private int sessionNum;
 
     private boolean running;
+    private boolean started;
     private long timeWhenStopped;
     private Polyline runningRoute;
 
     private long previousTime;
     private long currentTime;
     private Pace currentPace;
+    private List<Double> paces;
     private Double distanceTraveled;
 
-    private NotificationManager mNotific;
-    private int imp;
-    final String ChannelID="CCChannel";
+    private CCSession FinalSession;
+    private LiveSession currentSession;
+
+    private FirebaseFirestore db;
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+    private DocumentReference userDocRef;
 
     private BroadcastReceiver broadcastReceiver;
 
@@ -95,18 +114,41 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         pace = findViewById(R.id.paceField);
         distance = findViewById(R.id.distanceField);
-        distanceTraveled = 0.0;
-
-        mNotific = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        imp = NotificationManager.IMPORTANCE_HIGH;
-
-        currentPace = new Pace(0,0);
         runningFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.runningMap);
         runningFragment.getMapAsync(this);
 
+        FinalSession = new CCSession();
+        currentSession = new LiveSession();
 
+        distanceTraveled = 0.0;
+        currentPace = new Pace(0,0);
         running = false;
+        started = false;
+        paces = new ArrayList<Double>();
+
+        db = FirebaseFirestore.getInstance();
+
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+       userDocRef = db.collection("runners").document(mFirebaseUser.getUid());
+
+       userDocRef.collection("sessions").orderBy("sessionNum",Query.Direction.DESCENDING).limit(1).get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if(task.isSuccessful())
+                {
+                    QuerySnapshot result = task.getResult();
+                    List<DocumentSnapshot> results = result.getDocuments();
+                    sessionNum = Integer.parseInt(results.get(0).get("sessionNum").toString()) + 1;
+                }
+            }
+        });
+
+
+
+
         if(!runtime_permissions()) {
             setButtons();
         }
@@ -139,6 +181,8 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                     pause.setEnabled(true);
                     pause.setVisibility(View.VISIBLE);
                 }
+                currentSession.setRunning(true);
+                currentSession.update(userDocRef);
                 startService(i);
                 startChronometer();
                 PolylineOptions lineOptions = new PolylineOptions().width(5).color(Color.RED);
@@ -157,6 +201,8 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                     resume.setEnabled(true);
                     resume.setVisibility(View.VISIBLE);
                 }
+                currentSession.setRunning(false);
+                currentSession.update(userDocRef);
                 stopService(i);
                 stopChronometer();
 
@@ -174,6 +220,8 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                     pause.setEnabled(true);
                     pause.setVisibility(View.VISIBLE);
                 }
+                currentSession.setRunning(true);
+                currentSession.update(userDocRef);
                 startService(i);
                // testMap();
                 startChronometer();
@@ -184,7 +232,28 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
         stopWorkout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                if(running){
+                    stopService(new Intent(getApplicationContext(),GPSService.class));
+                    stopChronometer();
+                    FinalSession.setSessionPace(Pace.calculateAveragePace(paces));
+                    FinalSession.setSessionDuration(currentTime);
+                }
+                currentSession.setRunning(false);
+                currentSession.update(userDocRef);
+                userDocRef.collection("sessions").document("session" + sessionNum).set(FinalSession).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+                startActivity(new Intent(CoachCountySessionActivity.this, SessionSummary.class));
+                finish();
             }
         });
     }
@@ -221,18 +290,40 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                     LatLng newPoint = new LatLng(Double.parseDouble(intent.getExtras().get("latitude").toString()), Double.parseDouble(intent.getExtras().get("longitude").toString()));
                     if(intent.getExtras().get("distance") != null) {
                         Log.d(TAG, intent.getExtras().get("distance").toString());
+
+                        //Calculations
                         Double paceVal = Pace.calculatePace(Double.parseDouble(intent.getExtras().get("distance").toString()),currentTime,previousTime);
                         Double prevDist = distanceTraveled;
                         distanceTraveled = (distanceTraveled) + (Double.parseDouble(intent.getExtras().get("distance").toString()) * 0.00062137);
+
+                        //Update textViews
+                        distance.setText((new DecimalFormat("#.00mi").format(distanceTraveled)));
+                        pace.setText(currentPace.getPaceString());
+
+                        //Update local variables
+                        currentPace.setMinute((int)Math.floor(paceVal));
+                        currentPace.setSeconds((int)Math.round(((paceVal - currentPace.getMinute()) * 60)));
+                        paces.add(paceVal);
+
+                        //Update Live Database
+                        currentSession.setCurrentDistance(distanceTraveled);
+                        currentSession.setCurrentDuration(currentTime);
+                        currentSession.setCurrentLocation(newPoint);
+                        currentSession.setCurrentPace(currentPace);
+                        currentSession.update(userDocRef);
+
+                        //notify user of mile ran
                         if(Math.floor(distanceTraveled) > Math.floor(prevDist)) {
                             Toast.makeText(context, "You ran " + (new DecimalFormat("#.00mi").format(distanceTraveled)), Toast.LENGTH_LONG).show();
                         }
-                        distance.setText((new DecimalFormat("#.00mi").format(distanceTraveled)));
-                        currentPace.setMinute((int)Math.floor(paceVal));
-                        currentPace.setSeconds((int)Math.round(((paceVal - currentPace.getMinute()) * 60)));
-                        pace.setText(currentPace.getPaceString());
+
+                        drawRoute(newPoint);
+
+                        //update Final Session
+                        FinalSession.setSessionDistance(distanceTraveled);
+                        FinalSession.addLocation(newPoint);
                     }
-                    drawRoute(newPoint);
+
                 }
             };
         }
@@ -244,6 +335,7 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
          chronometer.start();
          chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
          currentTime = SystemClock.elapsedRealtime() - chronometer.getBase();
+         started = true;
          running = true;
      }
     }
@@ -270,144 +362,5 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
         runningMap.setIndoorEnabled(true);
     }
 
-    private void calculateBetweenPoints(LatLng pointA, LatLng pointB, double timeBetween){
-        Double distance = SphericalUtil.computeDistanceBetween(pointA, pointB) * 0.00062137;
 
-    }
-
-
-    public void testMap() {
-        LatLng one = new LatLng(42.620973, -87.821310);
-        LatLng two = new LatLng(42.620404, -87.821567);
-        LatLng three = new LatLng(42.619267, -87.822639);
-        LatLng four = new LatLng(42.618699, -87.822983);
-        LatLng five = new LatLng(42.618857, -87.823883);
-        LatLng six = new LatLng(42.620152, -87.824656);
-        LatLng seven = new LatLng(42.621383, -87.824913);
-        LatLng eight = new LatLng(42.621983, -87.824656);
-        LatLng nine = new LatLng(42.623499, -87.823969);
-        LatLng ten = new LatLng(42.624699, -87.822253);
-        LatLng eleven = new LatLng(42.624730, -87.820709);
-        LatLng twelve = new LatLng(42.623846, -87.820109);
-        LatLng thirteen = new LatLng(42.622646, -87.820409);
-        LatLng fourteen = new LatLng(42.621446, -87.820966);
-        final List<LatLng> testPoints = new ArrayList<LatLng>();
-        testPoints.add(one);
-        testPoints.add(two);
-        testPoints.add(three);
-        testPoints.add(four);
-        testPoints.add(five);
-        testPoints.add(six);
-        testPoints.add(seven);
-        testPoints.add(eight);
-        testPoints.add(nine);
-        testPoints.add(ten);
-        testPoints.add(eleven);
-        testPoints.add(twelve);
-        testPoints.add(thirteen);
-        testPoints.add(fourteen);
-
-        Handler handler = new Handler();
-
-        handler.postDelayed(
-                new Runnable() {
-                public void run() {
-            drawRoute(testPoints.get(0));
-            testPoints.remove(0);
-                }
-            }, 0);
-
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 10000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 20000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 30000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 40000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 50000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 60000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 70000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 80000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 90000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 100000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 110000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 120000);
-        handler.postDelayed(
-                new Runnable() {
-                    public void run() {
-                        drawRoute(testPoints.get(0));
-                        testPoints.remove(0);
-                    }
-                }, 130000);
-
-    }
 }
