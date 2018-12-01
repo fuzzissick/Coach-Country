@@ -5,6 +5,10 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -61,11 +65,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private TextView coachField;
     private TextView statusField;
     private Button startSession;
+    private DrawerLayout mDrawerLayout;
+
+    private boolean isInFront;
+
 
     public static final String ANONYMOUS = "anonymous";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
 
         // Set default username is anonymous.
@@ -86,10 +95,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 mPhotoUrl = mFirebaseUser.getPhotoUrl().toString();
             }
         }
-
-        //Init toolbar
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
 
         // init firestore
 
@@ -142,6 +147,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
 
         startSession.setOnClickListener(startSessionHandler);
 
+        //Init toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // Handle navigation view item clicks here.
+                        switch (menuItem.getItemId()) {
+                            case R.id.pastSessions:
+                                startActivity(new Intent(MainActivity.this, SessionHistory.class));
+                                finish();
+                                return true;
+                        }
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+
+                        return true;
+                    }
+                });
+
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+
+
+
 
     }
     View.OnClickListener startSessionHandler = new View.OnClickListener() {
@@ -161,6 +201,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+
             case R.id.sign_out:
                 mFirebaseAuth.signOut();
                 mUsername = ANONYMOUS;
@@ -208,7 +252,4 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
         Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
     }
-
-
-
 }

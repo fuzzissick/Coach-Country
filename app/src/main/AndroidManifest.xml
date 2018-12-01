@@ -38,7 +38,8 @@
 
         <service android:name=".GPSService" />
 
-        <activity android:name=".SessionSummary"></activity>
+        <activity android:name=".SessionSummary" />
+        <activity android:name=".SessionHistory"></activity>
     </application>
 
 </manifest>

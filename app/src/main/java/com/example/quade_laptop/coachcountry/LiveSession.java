@@ -61,7 +61,13 @@ public class LiveSession {
     }
 
     public void update(DocumentReference userDocRef){
-        userDocRef.update("running",true).addOnSuccessListener(new OnSuccessListener<Void>() {
+        userDocRef.update(
+                "LiveSession.running",this.running,
+                "LiveSession.currentDistance", this.currentDistance,
+                "LiveSession.currentPace", currentPace.getMappedObject(),
+                "LiveSession.currentDuration", this.currentDuration,
+                "LiveSession.currentLocation", this.currentLocation
+        ).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 Log.d(TAG, "Successfully updated!");

@@ -101,7 +101,7 @@
 
 
     <fragment
-        android:id="@+id/runningMap"
+        android:id="@+id/summaryMap"
         class="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="370dp"
         android:layout_height="250dp"

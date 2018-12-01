@@ -90,4 +90,14 @@ public class CCSession {
         sessionNum = 0;
     }
 
+    CCSession(Date sessionDate, List<GeoPoint> locations, String sessionDuration, Pace sessionPace, Double sessionDistance, int sessionNum){
+        this.sessionDate = new Timestamp(sessionDate);
+        this.locations = locations;
+        this.sessionDuration = sessionDuration;
+        this.sessionPace = sessionPace;
+        this.sessionDistance = sessionDistance;
+        this.sessionNum = sessionNum;
+    }
+
+
 }

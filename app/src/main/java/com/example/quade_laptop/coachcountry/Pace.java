@@ -1,6 +1,8 @@
 package com.example.quade_laptop.coachcountry;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Pace {
 
@@ -55,5 +57,14 @@ public class Pace {
         runningPace = runningPace / d;
         Pace retval = new Pace((int) Math.floor(runningPace), (int) Math.round(((runningPace - (int) Math.floor(runningPace)) * 60)));
         return retval;
+    }
+
+    public Map<String, Object> getMappedObject(){
+        Map<String, Object> map = new HashMap<>();
+        map.put("minute", minute);
+        map.put("seconds",seconds);
+        map.put("paceString", getPaceString());
+
+        return map;
     }
 }

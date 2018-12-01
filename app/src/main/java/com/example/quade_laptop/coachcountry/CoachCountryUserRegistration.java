@@ -24,6 +24,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -118,11 +119,21 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
     private void registerEmail(){
         final CollectionReference runners = db.collection("runners");
         String[] split = mFirebaseUser.getDisplayName().toString().split("\\s+");
+        Pace fakePace = new Pace(0,0);
+
+        final Map<String,Object> liveSession = new HashMap<>();
+        liveSession.put("currentDuration", "00:00:00");
+        liveSession.put("currentPace", fakePace.getMappedObject());
+        liveSession.put("currentLocation", new GeoPoint(0,0));
+        liveSession.put("running", false);
+        liveSession.put("currentDistance", 0.0);
+
         final Map<String, Object> data = new HashMap<>();
         data.put("firstName",split[0]);
         data.put("lastName", split[1]);
         data.put("event", eventChooser.getSelectedItem().toString());
         data.put("year", yearChooser.getSelectedItem().toString());
+        data.put("LiveSession", liveSession);
         db.collection("teams")
                 .whereEqualTo("teamName", teamChooser.getSelectedItem().toString()) // <-- This line
                 .get()

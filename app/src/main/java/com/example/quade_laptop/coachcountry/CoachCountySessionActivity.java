@@ -141,7 +141,10 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                 {
                     QuerySnapshot result = task.getResult();
                     List<DocumentSnapshot> results = result.getDocuments();
-                    sessionNum = Integer.parseInt(results.get(0).get("sessionNum").toString()) + 1;
+                    if(results.size() == 0)
+                        sessionNum = 1;
+                    else
+                        sessionNum = Integer.parseInt(results.get(0).get("sessionNum").toString()) + 1;
                 }
             }
         });
@@ -237,6 +240,7 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                     stopChronometer();
                     FinalSession.setSessionPace(Pace.calculateAveragePace(paces));
                     FinalSession.setSessionDuration(currentTime);
+                    FinalSession.setSessionNum(sessionNum);
                 }
                 currentSession.setRunning(false);
                 currentSession.update(userDocRef);
@@ -252,7 +256,9 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-                startActivity(new Intent(CoachCountySessionActivity.this, SessionSummary.class));
+                Intent i = new Intent(CoachCountySessionActivity.this, SessionSummary.class);
+                i.putExtra("sessionNum", sessionNum);
+                startActivity(i);
                 finish();
             }
         });
