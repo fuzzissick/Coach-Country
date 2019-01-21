@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CCSession {
+    private String documentID;
     private Double sessionDistance;
     private Pace sessionPace;
     private String sessionDuration;
@@ -81,6 +82,10 @@ public class CCSession {
         locations.add(local);
     }
 
+    public String getDocumentID(){
+        return documentID;
+    }
+
     CCSession() {
         sessionDate = Timestamp.now();
         locations = new ArrayList<GeoPoint>();
@@ -90,7 +95,8 @@ public class CCSession {
         sessionNum = 0;
     }
 
-    CCSession(Date sessionDate, List<GeoPoint> locations, String sessionDuration, Pace sessionPace, Double sessionDistance, int sessionNum){
+    CCSession(String documentID, Date sessionDate, List<GeoPoint> locations, String sessionDuration, Pace sessionPace, Double sessionDistance, int sessionNum){
+        this.documentID = documentID;
         this.sessionDate = new Timestamp(sessionDate);
         this.locations = locations;
         this.sessionDuration = sessionDuration;

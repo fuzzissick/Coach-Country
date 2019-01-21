@@ -136,6 +136,7 @@ public class SessionHistory extends AppCompatActivity {
                             locations = (List<GeoPoint>) sessionDoc.get("locations");
                             Pace sessionPace = new Pace(Integer.parseInt(sessionDoc.get("sessionPace.minute").toString()),Integer.parseInt(sessionDoc.get("sessionPace.seconds").toString()));
                             sessionsSummaryList.add(new CCSession(
+                                    sessionDoc.getId(),
                                     (Date)sessionDoc.get("sessionDate"),
                                     locations,
                                     sessionDoc.get("sessionDuration").toString(),
@@ -144,7 +145,7 @@ public class SessionHistory extends AppCompatActivity {
                                     Integer.parseInt(sessionDoc.get("sessionNum").toString())
                             ));
                         }
-                    SessionRVAdapter adapter = new SessionRVAdapter(sessionsSummaryList);
+                    SessionRVAdapter adapter = new SessionRVAdapter(sessionsSummaryList,SessionHistory.this);
                     sessionHistoryRV.setAdapter(adapter);
                 }
             }
