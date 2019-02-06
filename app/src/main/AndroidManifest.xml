@@ -40,7 +40,8 @@
 
         <activity android:name=".SessionSummary" />
         <activity android:name=".SessionHistory" />
-        <activity android:name=".SessionView"></activity>
+        <activity android:name=".SessionView" />
+        <activity android:name=".CoachHomePage"></activity>
     </application>
 
 </manifest>
