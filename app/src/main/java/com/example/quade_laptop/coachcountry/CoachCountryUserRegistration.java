@@ -130,7 +130,10 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
 
         final Map<String, Object> data = new HashMap<>();
         data.put("firstName",split[0]);
-        data.put("lastName", split[1]);
+        if (split.length != 2)
+            data.put("lastName", "");
+        else
+            data.put("lastName", split[1]);
         data.put("event", eventChooser.getSelectedItem().toString());
         data.put("year", yearChooser.getSelectedItem().toString());
         data.put("LiveSession", liveSession);

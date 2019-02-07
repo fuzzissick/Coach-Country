@@ -34,8 +34,7 @@
             android:id="@+id/spinner_team"
             android:layout_width="272dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:entries="@string/github_client_secret" />
+            android:layout_weight="1" />
     </LinearLayout>
 
     <LinearLayout

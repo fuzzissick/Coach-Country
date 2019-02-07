@@ -42,6 +42,7 @@ public class SessionRVAdapter extends RecyclerView.Adapter<SessionRVAdapter.Pers
                 public void onClick(View v) {
                     Intent i = new Intent(v.getContext(), SessionView.class);
                     i.putExtra("documentID", documentID);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     activity.getApplicationContext().startActivity(i);
                 }
             });

@@ -3,5 +3,6 @@
 
     <item
         android:id="@+id/sign_out"
+        android:icon="@drawable/com_facebook_close"
         android:title="Sign Out" />
 </menu>

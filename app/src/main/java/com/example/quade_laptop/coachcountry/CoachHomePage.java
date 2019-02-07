@@ -5,6 +5,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -34,6 +36,8 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
     private static final String TAG = "Coaching Home Page";
     private GoogleMap runningMap;
     private SupportMapFragment runningFragment;
+    private RecyclerView onlineRunnersRV;
+    private LinearLayoutManager llm;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
@@ -66,38 +70,13 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                 .findFragmentById(R.id.runningMap);
         runningFragment.getMapAsync(this);
 
+        //init RV
+        onlineRunnersRV = (RecyclerView)findViewById(R.id.rv);
+        llm = new LinearLayoutManager(getApplicationContext());
+        onlineRunnersRV.setLayoutManager(llm);
+
         // init firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        db.collection("runners").document(mFirebaseUser.getUid()).collection("sessions").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if(task.isSuccessful())
-                {
-                    QuerySnapshot result = task.getResult();
-                    List<DocumentSnapshot> results = result.getDocuments();
-                    if(results.size() == 0)
-                        Toast.makeText(getApplicationContext(), "There are no sessions to show.", Toast.LENGTH_LONG);
-                    else
-                        for(DocumentSnapshot sessionDoc : results){
-                            List<GeoPoint> locations = new ArrayList<GeoPoint>();
-                            locations = (List<GeoPoint>) sessionDoc.get("locations");
-                            Pace sessionPace = new Pace(Integer.parseInt(sessionDoc.get("sessionPace.minute").toString()),Integer.parseInt(sessionDoc.get("sessionPace.seconds").toString()));
-                            sessionsSummaryList.add(new CCSession(
-                                    sessionDoc.getId(),
-                                    (Date)sessionDoc.get("sessionDate"),
-                                    locations,
-                                    sessionDoc.get("sessionDuration").toString(),
-                                    sessionPace,
-                                    Double.parseDouble(sessionDoc.get("sessionDistance").toString()),
-                                    Integer.parseInt(sessionDoc.get("sessionNum").toString())
-                            ));
-                        }
-                    SessionRVAdapter adapter = new SessionRVAdapter(sessionsSummaryList,SessionHistory.this);
-                    sessionHistoryRV.setAdapter(adapter);
-                }
-            }
-        });
 
 
         db.collection("runners")
@@ -111,13 +90,12 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                             return;
                         }
 
-                        List<String> cities = new ArrayList<>();
+                        List<Runner> runners = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
-                            if (doc.get("name") != null) {
-                                cities.add(doc.getString("name"));
-                            }
+                            runners.add(new Runner(doc));
                         }
-                        Log.d(TAG, "Current cites in CA: " + cities);
+                        RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
+                        onlineRunnersRV.setAdapter(adapter);
                     }
                 });
     }

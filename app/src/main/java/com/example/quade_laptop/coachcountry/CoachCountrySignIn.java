@@ -62,6 +62,7 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setAvailableProviders(providers)
+                        .setTheme(R.style.AppTheme)
                         .build(),
                 RC_SIGN_IN);
     }

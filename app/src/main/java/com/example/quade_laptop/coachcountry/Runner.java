@@ -4,6 +4,7 @@ import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.Date;
 import java.util.List;
@@ -68,11 +69,11 @@ public class Runner {
     private String year;
     private LiveSession session;
 
-    Runner(DocumentSnapshot docSnap){
+    Runner(QueryDocumentSnapshot docSnap){
         this.documentID = docSnap.getId();
         this.firstName = docSnap.get("firstName").toString();
         this.lastName = docSnap.get("lastName").toString();
-        this.eventGroup = docSnap.get("eventGroup").toString();
+        this.eventGroup = docSnap.get("event").toString();
         this.year = docSnap.get("year").toString();
     }
 

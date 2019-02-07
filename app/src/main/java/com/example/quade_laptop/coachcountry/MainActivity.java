@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     private Button startSession;
     private DrawerLayout mDrawerLayout;
 
+    private boolean coachPrescence;
+
     private boolean isInFront;
 
 
@@ -127,7 +129,16 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 }
 
                 if (snapshot != null && snapshot.exists()) {
-                    statusField.setText(snapshot.get("status").toString());
+                    String status = snapshot.get("status").toString();
+                    statusField.setText(status);
+                    if(status.equalsIgnoreCase("Online")) {
+                        statusField.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_action_eye_open, 0, 0, 0);
+                        coachPrescence = true;
+                    }
+                    else{
+                        statusField.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_action_eye_closed, 0, 0, 0);
+                        coachPrescence = false;
+                    }
                 } else {
                     Log.d(TAG, "Current data: null");
                 }
@@ -186,8 +197,17 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
     }
     View.OnClickListener startSessionHandler = new View.OnClickListener() {
         public void onClick(View v) {
-            startActivity(new Intent(MainActivity.this, CoachCountySessionActivity.class));
-            finish();
+            if(coachPrescence == true) {
+                startActivity(new Intent(MainActivity.this, CoachCountySessionActivity.class));
+                finish();
+            }
+            else{
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "Coach is not online.",
+                        Toast.LENGTH_SHORT);
+
+                toast.show();
+            }
         }
     };
 
