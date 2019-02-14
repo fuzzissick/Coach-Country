@@ -13,6 +13,9 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -35,6 +38,7 @@ import static com.example.quade_laptop.coachcountry.MainActivity.ANONYMOUS;
 public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallback {
     private static final String TAG = "Coaching Home Page";
     private GoogleMap runningMap;
+    private List<Runner> mapRunners;
     private SupportMapFragment runningFragment;
     private RecyclerView onlineRunnersRV;
     private LinearLayoutManager llm;
@@ -97,8 +101,20 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                                 runners.add(runner);
                             }
                         }
+
+                        
+                        mapRunners = runners;
                         RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
                         onlineRunnersRV.setAdapter(adapter);
+                        runningMap.clear();
+                        for (Runner runner: mapRunners) {
+                            runningMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
+                                            runner.getLiveSession().getCurrentLocation().getLongitude()))
+                                    .title(runner.getFullName())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(31))
+                            );
+                        }
                     }
                 });
     }

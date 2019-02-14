@@ -82,6 +82,7 @@ public class Runner {
     private String year;
     private LiveSession LiveSession;
 
+
     Runner(QueryDocumentSnapshot docSnap){
         this.documentID = docSnap.getId();
         this.firstName = docSnap.get("firstName").toString();
