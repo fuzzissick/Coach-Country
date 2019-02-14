@@ -30,19 +30,26 @@ public class LiveSession {
         return currentDuration;
     }
 
-    public void setCurrentDuration(long duration) {
+    public void setLCurrentDuration(long duration) {
         int h   = (int)(duration /3600000);
         int m = (int)(duration - h*3600000)/60000;
         int s= (int)(duration - h*3600000- m*60000)/1000 ;
         this.currentDuration = (h < 10 ? "0"+h: h)+":"+(m < 10 ? "0"+m: m)+":"+ (s < 10 ? "0"+s: s);
     }
 
+    public void setCurrentDuration(String duration) {
+        this.currentDuration = duration;
+    }
+
     public GeoPoint getCurrentLocation() {
         return currentLocation;
     }
 
-    public void setCurrentLocation(LatLng currentLocation) {
+    public void setLatLngCurrentLocation(LatLng currentLocation) {
         this.currentLocation = new GeoPoint(currentLocation.latitude,currentLocation.longitude);
+    }
+    public void setCurrentLocation(GeoPoint currentLocation) {
+        this.currentLocation = currentLocation;
     }
 
     public Double getCurrentDistance() {
@@ -88,4 +95,6 @@ public class LiveSession {
         currentLocation = null;
         running = false;
     }
+
+
 }

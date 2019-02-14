@@ -313,8 +313,8 @@ public class CoachCountySessionActivity extends AppCompatActivity implements OnM
 
                         //Update Live Database
                         currentSession.setCurrentDistance(distanceTraveled);
-                        currentSession.setCurrentDuration(currentTime);
-                        currentSession.setCurrentLocation(newPoint);
+                        currentSession.setLCurrentDuration(currentTime);
+                        currentSession.setLatLngCurrentLocation(newPoint);
                         currentSession.setCurrentPace(currentPace);
                         currentSession.update(userDocRef);
 

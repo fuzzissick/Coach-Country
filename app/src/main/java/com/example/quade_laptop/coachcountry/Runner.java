@@ -8,6 +8,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class Runner {
     public String getDocumentID() {
@@ -34,12 +35,12 @@ public class Runner {
         this.lastName = lastName;
     }
 
-    public String getEventGroup() {
-        return eventGroup;
+    public String getEvent() {
+        return event;
     }
 
-    public void setEventGroup(String eventGroup) {
-        this.eventGroup = eventGroup;
+    public void setEvent(String eventGroup) {
+        this.event = eventGroup;
     }
 
     public String getYear() {
@@ -50,12 +51,22 @@ public class Runner {
         this.year = year;
     }
 
-    public LiveSession getSession() {
-        return session;
+
+    public String getTeam() {
+        return team;
     }
 
-    public void setSession(LiveSession session) {
-        this.session = session;
+    public void setTeam(String team) {
+        this.team = team;
+    }
+
+
+    public LiveSession getLiveSession() {
+        return LiveSession;
+    }
+
+    public void setLiveSession(LiveSession session) {
+        this.LiveSession = session;
     }
 
     public String getFullName(){
@@ -65,16 +76,22 @@ public class Runner {
     private String documentID;
     private String firstName;
     private String lastName;
-    private String eventGroup;
+    private String event;
+
+    private String team;
     private String year;
-    private LiveSession session;
+    private LiveSession LiveSession;
 
     Runner(QueryDocumentSnapshot docSnap){
         this.documentID = docSnap.getId();
         this.firstName = docSnap.get("firstName").toString();
         this.lastName = docSnap.get("lastName").toString();
-        this.eventGroup = docSnap.get("event").toString();
+        this.event = docSnap.get("event").toString();
         this.year = docSnap.get("year").toString();
+        this.team = docSnap.get("team").toString();
     }
+
+    Runner(){
+    };
 
 }

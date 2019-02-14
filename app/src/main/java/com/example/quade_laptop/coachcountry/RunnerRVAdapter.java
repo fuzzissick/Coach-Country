@@ -70,7 +70,7 @@ public class RunnerRVAdapter extends RecyclerView.Adapter<RunnerRVAdapter.Person
     @Override
     public void onBindViewHolder(PersonViewHolder personViewHolder, int i) {
         personViewHolder.full_name.setText(runners.get(i).getFullName());
-        personViewHolder.event_group.setText("Event: " + runners.get(i).getEventGroup());
+        personViewHolder.event_group.setText("Event: " + runners.get(i).getEvent());
         personViewHolder.year_in_school.setText("Year: " + runners.get(i).getYear());
         personViewHolder.current_status.setText("Status: " + "Yeet"); //*****************************8
         personViewHolder.documentID = runners.get(i).getDocumentID();

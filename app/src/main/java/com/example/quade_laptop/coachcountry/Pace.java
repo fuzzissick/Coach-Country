@@ -40,6 +40,10 @@ public class Pace {
         this.seconds = seconds;
     }
 
+    Pace(){
+
+    }
+
     public static Double calculatePace(Double distance, long currentTime, long previousTime) {
         Double timeInHour = ((currentTime - previousTime) / 1000.0) / 3600.0;
         Double inMiles = distance / 1609.344;

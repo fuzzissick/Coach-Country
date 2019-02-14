@@ -92,7 +92,10 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
 
                         List<Runner> runners = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
-                            runners.add(new Runner(doc));
+                            Runner runner = doc.toObject(Runner.class);
+                            if(runner.getLiveSession().getRunning()) {
+                                runners.add(runner);
+                            }
                         }
                         RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
                         onlineRunnersRV.setAdapter(adapter);

@@ -21,11 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <uses-library android:name="org.apache.http.legacy" android:required="false"/>
         <activity
@@ -43,7 +39,13 @@
         <activity android:name=".SessionSummary" />
         <activity android:name=".SessionHistory" />
         <activity android:name=".SessionView" />
-        <activity android:name=".CoachHomePage"></activity>
+        <activity android:name=".CoachHomePage">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
