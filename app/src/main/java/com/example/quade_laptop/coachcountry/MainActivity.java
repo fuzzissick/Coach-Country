@@ -21,12 +21,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -36,10 +33,8 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.model.Document;
 import com.google.firebase.functions.FirebaseFunctions;
 
 
@@ -101,8 +96,31 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         // init firestore
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        DocumentReference user = db.collection("runners").document(mFirebaseUser.getUid().toString());
+        DocumentReference userRunner = db.collection("runners").document(mFirebaseUser.getUid().toString());
+        final DocumentReference userCoach = db.collection("coaches").document(mFirebaseUser.getUid().toString());
 
+        userCoach.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.getResult().exists()) {
+                    Intent i = new Intent(MainActivity.this, CoachHomePage.class);
+                    startActivity(i);
+                    finish();
+                    return;
+                }
+                else{
+                    Log.d(TAG, "Doesn't Exist");
+                }
+            }
+        });
+
+
+        if(userRunner == null && userCoach != null){
+            Intent i = new Intent(this, CoachHomePage.class);
+            startActivity(i);
+            finish();
+            return;
+        }
         final DocumentReference docRef = db.collection("coaches").document("C7NDyN2jFgYE3dtWwYzq0d1EnBM2");
 
         docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

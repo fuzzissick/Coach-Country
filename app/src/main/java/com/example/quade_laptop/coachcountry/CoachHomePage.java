@@ -1,13 +1,21 @@
 package com.example.quade_laptop.coachcountry;
 
 import android.content.Intent;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -79,6 +87,13 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         llm = new LinearLayoutManager(getApplicationContext());
         onlineRunnersRV.setLayoutManager(llm);
 
+        //Init toolbar
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+
         // init firestore
         FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -102,7 +117,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                             }
                         }
 
-                        
+
                         mapRunners = runners;
                         RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
                         onlineRunnersRV.setAdapter(adapter);
@@ -117,6 +132,28 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                         }
                     }
                 });
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.sign_out:
+                mFirebaseAuth.signOut();
+                mUsername = ANONYMOUS;
+                startActivity(new Intent(this, CoachCountrySignIn.class));
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

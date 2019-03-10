@@ -163,7 +163,7 @@ public class CoachCountrySignIn extends AppCompatActivity implements GoogleApiCl
                     registerUserIntent.putExtra("UID", user.getUid());
                     startActivityForResult(registerUserIntent, RC_SIGN_IN);
                 } else {
-                    startActivity(new Intent(this, CoachHomePage.class));
+                    startActivity(new Intent(this, MainActivity.class));
                 }
                 finish();
             } else {
