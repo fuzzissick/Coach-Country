@@ -67,6 +67,15 @@ public class LiveSession {
         this.running = running;
     }
 
+    public String getPaceOrStatus(){
+        if(running){
+            return "Current Pace: " + currentPace.getPaceString();
+        }
+        else{
+            return "Not Currently Running";
+        }
+    }
+
     public void update(DocumentReference userDocRef){
         userDocRef.update(
                 "LiveSession.running",this.running,

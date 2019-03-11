@@ -2,11 +2,13 @@ package com.example.quade_laptop.coachcountry;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ public class RunnerRVAdapter extends RecyclerView.Adapter<RunnerRVAdapter.Person
         TextView event_group;
         TextView year_in_school;
         TextView current_status;
+        ImageView blip_color;
         String documentID;
 
         PersonViewHolder(View itemView) {
@@ -33,6 +36,7 @@ public class RunnerRVAdapter extends RecyclerView.Adapter<RunnerRVAdapter.Person
             event_group = (TextView) itemView.findViewById(R.id.event_group);
             year_in_school = (TextView) itemView.findViewById(R.id.year_in_school);
             current_status = (TextView) itemView.findViewById(R.id.current_status);
+            blip_color = itemView.findViewById(R.id.blip_color);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -74,6 +78,7 @@ public class RunnerRVAdapter extends RecyclerView.Adapter<RunnerRVAdapter.Person
         personViewHolder.year_in_school.setText("Year: " + runners.get(i).getYear());
         personViewHolder.current_status.setText("Status: " + "Yeet"); //*****************************8
         personViewHolder.documentID = runners.get(i).getDocumentID();
+        personViewHolder.blip_color.setBackgroundColor(Color.HSVToColor(new float[] { Integer.parseInt(runners.get(i).getColor()), 1.0f, 1.0f }));
 
 
     }

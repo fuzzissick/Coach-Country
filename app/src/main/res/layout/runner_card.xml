@@ -19,12 +19,13 @@
 
             <ImageView
                 android:id="@+id/blip_color"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="26dp"
+                android:layout_height="28dp"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginEnd="35dp"
-                app:srcCompat="@android:color/holo_blue_bright" />
+                android:background="@drawable/com_facebook_button_like_icon_selected"
+                app:srcCompat="@color/cardview_shadow_end_color" />
 
             <TextView
                 android:layout_width="wrap_content"

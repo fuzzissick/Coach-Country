@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 public class CoachCountryUserRegistration extends AppCompatActivity {
 
@@ -61,6 +62,7 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
     private FirebaseUser mFirebaseUser;
 
     private ArrayList<team> teamsArray;
+    private Random rand;
 
     int currentSelection;
 
@@ -72,6 +74,8 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+        rand = new Random();
 
        teamChooser = (Spinner) findViewById(R.id.spinner_team);
        eventChooser = (Spinner) findViewById(R.id.spinner_event);
@@ -128,6 +132,7 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
         liveSession.put("running", false);
         liveSession.put("currentDistance", 0.0);
 
+
         final Map<String, Object> data = new HashMap<>();
         data.put("firstName",split[0]);
         if (split.length != 2)
@@ -136,6 +141,8 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
             data.put("lastName", split[1]);
         data.put("event", eventChooser.getSelectedItem().toString());
         data.put("year", yearChooser.getSelectedItem().toString());
+        data.put("color", new Integer(rand.nextInt( 361)).toString());
+        data.put("online", true);
         data.put("LiveSession", liveSession);
         db.collection("teams")
                 .whereEqualTo("teamName", teamChooser.getSelectedItem().toString()) // <-- This line
@@ -145,7 +152,7 @@ public class CoachCountryUserRegistration extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (DocumentSnapshot document : task.getResult()) {
-                                data.put("team", document.getReference().toString());
+                                data.put("team", document.getId());
                                 runners.document(mFirebaseUser.getUid()).set(data)
                                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override

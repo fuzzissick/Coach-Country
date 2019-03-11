@@ -28,6 +28,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+
 import static com.example.quade_laptop.coachcountry.MainActivity.ANONYMOUS;
 
 public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallback {
@@ -49,12 +51,14 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
     private List<Runner> mapRunners;
     private SupportMapFragment runningFragment;
     private RecyclerView onlineRunnersRV;
+    private boolean firsttime;
     private LinearLayoutManager llm;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private FirebaseFunctions mFunctions;
     private String mUsername;
+    private DocumentSnapshot coachDoc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +68,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         // Set default username is anonymous.
         mUsername = ANONYMOUS;
 
-
+        firsttime = true;
         // Initialize Firebase Auth
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
@@ -76,6 +80,8 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         } else {
             mUsername = mFirebaseUser.getDisplayName();
         }
+
+
 
         //init map
         runningFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -95,11 +101,34 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
 
         // init firestore
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final FirebaseFirestore db = FirebaseFirestore.getInstance();
+        final DocumentReference coachDocument = db.collection("coaches").document(mFirebaseUser.getUid().toString());
 
 
+
+        //get the coaching document
+        coachDocument.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.getResult().exists()) {
+                    coachDoc = task.getResult();
+                    //set up recycler view based on coach
+                    setUpRV(db);
+                    Log.d(TAG, "SUCCESS");
+                    return;
+                }
+                else{
+                    Log.d(TAG, "Doesn't Exist");
+                }
+            }
+        });
+
+    }
+
+    private void setUpRV(FirebaseFirestore db){
         db.collection("runners")
-                .whereEqualTo("team", "carthage")
+                .whereEqualTo("team", coachDoc.get("team"))
+                .whereEqualTo("online", true)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
@@ -112,22 +141,28 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                         List<Runner> runners = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
                             Runner runner = doc.toObject(Runner.class);
-                            if(runner.getLiveSession().getRunning()) {
-                                runners.add(runner);
-                            }
+                            runners.add(runner);
                         }
 
 
                         mapRunners = runners;
                         RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
-                        onlineRunnersRV.setAdapter(adapter);
+                        if(firsttime == false) {
+                            if(adapter.getItemCount() != onlineRunnersRV.getAdapter().getItemCount()) {
+                                onlineRunnersRV.setAdapter(adapter);
+                            }
+                        } else{
+                            firsttime = false;
+                            onlineRunnersRV.setAdapter(adapter);
+                        }
                         runningMap.clear();
                         for (Runner runner: mapRunners) {
                             runningMap.addMarker(new MarkerOptions()
                                     .position(new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
                                             runner.getLiveSession().getCurrentLocation().getLongitude()))
                                     .title(runner.getFullName())
-                                    .icon(BitmapDescriptorFactory.defaultMarker(31))
+                                    .snippet(runner.getLiveSession().getPaceOrStatus())
+                                    .icon(BitmapDescriptorFactory.defaultMarker(Integer.parseInt(runner.getColor())))
                             );
                         }
                     }

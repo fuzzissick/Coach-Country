@@ -73,6 +73,24 @@ public class Runner {
         return firstName + " " + lastName;
     }
 
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+
+    public boolean isOnline() {
+        return online;
+    }
+
+    public void setOnline(boolean online) {
+        this.online = online;
+    }
+
+
     private String documentID;
     private String firstName;
     private String lastName;
@@ -82,6 +100,9 @@ public class Runner {
     private String year;
     private LiveSession LiveSession;
 
+    private boolean online;
+    private String color;
+
 
     Runner(QueryDocumentSnapshot docSnap){
         this.documentID = docSnap.getId();
@@ -90,6 +111,7 @@ public class Runner {
         this.event = docSnap.get("event").toString();
         this.year = docSnap.get("year").toString();
         this.team = docSnap.get("team").toString();
+        this.color = docSnap.get("color").toString();
     }
 
     Runner(){
