@@ -40,10 +40,6 @@ import com.google.firebase.functions.FirebaseFunctions;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener{
     private static final String TAG = "MainActivity";
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
     private String mUsername;
     private String mPhotoUrl;
     private SharedPreferences mSharedPreferences;

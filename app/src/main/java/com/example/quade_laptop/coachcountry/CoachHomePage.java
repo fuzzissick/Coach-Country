@@ -16,6 +16,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.GridView;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
@@ -51,6 +54,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
     private List<Runner> mapRunners;
     private SupportMapFragment runningFragment;
     private RecyclerView onlineRunnersRV;
+    private GridView gridView;
     private boolean firsttime;
     private LinearLayoutManager llm;
 
@@ -89,9 +93,10 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         runningFragment.getMapAsync(this);
 
         //init RV
-        onlineRunnersRV = (RecyclerView)findViewById(R.id.rv);
+        //onlineRunnersRV = (RecyclerView)findViewById(R.id.rv);
+        gridView = (GridView)findViewById(R.id.gv);
         llm = new LinearLayoutManager(getApplicationContext());
-        onlineRunnersRV.setLayoutManager(llm);
+        //onlineRunnersRV.setLayoutManager(llm);
 
         //Init toolbar
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
@@ -125,6 +130,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
 
     }
 
+    //grab all runners that are a part of the coaches team and that are presently online
     private void setUpRV(FirebaseFirestore db){
         db.collection("runners")
                 .whereEqualTo("team", coachDoc.get("team"))
@@ -138,6 +144,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                             return;
                         }
 
+                        //grab every runner and populate a list
                         List<Runner> runners = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
                             Runner runner = doc.toObject(Runner.class);
@@ -146,15 +153,25 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
 
 
                         mapRunners = runners;
-                        RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
+                        //
+                        //RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
+
+                        CurrentRunnersAdapter adapter = new CurrentRunnersAdapter(runners,CoachHomePage.this);
                         if(firsttime == false) {
-                            if(adapter.getItemCount() != onlineRunnersRV.getAdapter().getItemCount()) {
-                                onlineRunnersRV.setAdapter(adapter);
+                            if(adapter.getCount()!= gridView.getAdapter().getCount()) {
+                                //onlineRunnersRV.setAdapter(adapter);
+                                gridView.setAdapter(adapter);
                             }
                         } else{
                             firsttime = false;
-                            onlineRunnersRV.setAdapter(adapter);
+                            //onlineRunnersRV.setAdapter(adapter);
+                            gridView.setAdapter(adapter);
                         }
+
+
+
+                        //add and update markers on the map.
+                        //Currently not what I want it to be, I want the blips to not unfocus and just update the information on them
                         runningMap.clear();
                         for (Runner runner: mapRunners) {
                             runningMap.addMarker(new MarkerOptions()
