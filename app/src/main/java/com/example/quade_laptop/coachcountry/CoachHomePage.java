@@ -21,11 +21,15 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -43,6 +47,8 @@ import com.google.firebase.functions.FirebaseFunctions;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -52,12 +58,13 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
     private static final String TAG = "Coaching Home Page";
     private GoogleMap runningMap;
     private List<Runner> mapRunners;
+    private HashMap<String,Marker> mapMarkers;
     private SupportMapFragment runningFragment;
     private RecyclerView onlineRunnersRV;
     private GridView gridView;
     private boolean firsttime;
     private LinearLayoutManager llm;
-
+    private float zoomlevel;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private FirebaseFunctions mFunctions;
@@ -109,6 +116,8 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
         final DocumentReference coachDocument = db.collection("coaches").document(mFirebaseUser.getUid().toString());
 
+        mapMarkers = new HashMap<>();
+
 
 
         //get the coaching document
@@ -127,6 +136,8 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                 }
             }
         });
+
+
 
     }
 
@@ -148,6 +159,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                         List<Runner> runners = new ArrayList<>();
                         for (QueryDocumentSnapshot doc : value) {
                             Runner runner = doc.toObject(Runner.class);
+                            runner.setDocumentID(doc.getId());
                             runners.add(runner);
                         }
 
@@ -156,32 +168,83 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                         //
                         //RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
 
-                        CurrentRunnersAdapter adapter = new CurrentRunnersAdapter(runners,CoachHomePage.this);
-                        if(firsttime == false) {
-                            if(adapter.getCount()!= gridView.getAdapter().getCount()) {
+                        CurrentRunnersAdapter adapter = new CurrentRunnersAdapter(runners, CoachHomePage.this);
+                        if (firsttime == false) {
+                            if (adapter.getCount() != gridView.getAdapter().getCount()) {
                                 //onlineRunnersRV.setAdapter(adapter);
                                 gridView.setAdapter(adapter);
                             }
-                        } else{
+                        } else {
                             firsttime = false;
                             //onlineRunnersRV.setAdapter(adapter);
                             gridView.setAdapter(adapter);
                         }
 
 
-
                         //add and update markers on the map.
                         //Currently not what I want it to be, I want the blips to not unfocus and just update the information on them
-                        runningMap.clear();
-                        for (Runner runner: mapRunners) {
-                            runningMap.addMarker(new MarkerOptions()
-                                    .position(new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
-                                            runner.getLiveSession().getCurrentLocation().getLongitude()))
-                                    .title(runner.getFullName())
-                                    .snippet(runner.getLiveSession().getPaceOrStatus())
-                                    .icon(BitmapDescriptorFactory.defaultMarker(Integer.parseInt(runner.getColor())))
-                            );
+
+                        for (Runner runner : mapRunners) {
+                            if (mapMarkers.containsKey(runner.getDocumentID())) {
+                                //Update pos
+                                LatLng pos = new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
+                                        runner.getLiveSession().getCurrentLocation().getLongitude());
+                                //check if pos changed
+                                if (pos != mapMarkers.get(runner.getDocumentID()).getPosition()) {
+                                    mapMarkers.get(runner.getDocumentID()).setPosition(pos);
+                                    mapMarkers.get(runner.getDocumentID()).setSnippet(runner.getLiveSession().getPaceOrStatus());
+                                    if(mapMarkers.get(runner.getDocumentID()).isInfoWindowShown()){
+                                        runningMap.animateCamera((CameraUpdateFactory.newLatLngZoom(pos, zoomlevel)));
+                                    }
+                                }
+                            } else {
+                                Marker newM = runningMap.addMarker(new MarkerOptions()
+                                        .position(new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
+                                                runner.getLiveSession().getCurrentLocation().getLongitude()))
+                                        .title(runner.getFullName())
+                                        .snippet(runner.getLiveSession().getPaceOrStatus())
+                                        .icon(BitmapDescriptorFactory.defaultMarker(Integer.parseInt(runner.getColor())))
+                                );
+                                mapMarkers.put(runner.getDocumentID(), newM);
+                            }
                         }
+
+
+                        Iterator<String> iterator = mapMarkers.keySet().iterator();
+
+                        while (iterator.hasNext()) {
+                            String key = iterator.next();
+                            Marker current = mapMarkers.get(key);
+                            boolean found = false;
+                            for (Runner runner : mapRunners) {
+                                if (key.equals(runner.getDocumentID())) {
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if (!found) {
+                                current.remove();
+                                iterator.remove();
+                                found = false;
+                            }
+                        }
+
+
+
+/*                        for (String key : mapMarkers.keySet()) {
+                            boolean found = false;
+                            for(Runner runner: mapRunners){
+                                if(key == runner.getDocumentID()){
+                                    found = true;
+                                    break;
+                                }
+                            }
+                            if(!found){
+                                mapMarkers.remove(key);
+                                runningMap.
+                                found = false;
+                            }
+                        }*/
                     }
                 });
     }
@@ -213,6 +276,14 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         // DO WHATEVER YOU WANT WITH GOOGLEMAP
         runningMap = map;
         runningMap.setIndoorEnabled(true);
+
+        runningMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                CameraPosition cameraPosition = runningMap.getCameraPosition();
+                zoomlevel = cameraPosition.zoom;
+            }
+        });
 
     }
 }
