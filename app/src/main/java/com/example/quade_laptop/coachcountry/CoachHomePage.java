@@ -137,7 +137,23 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
             }
         });
 
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                mapMarkers.get(mapRunners.get(position).getDocumentID()).showInfoWindow();
+                runningMap.animateCamera((CameraUpdateFactory.newLatLngZoom(new LatLng(mapRunners.get(position).getLiveSession().getCurrentLocation().getLatitude(),
+                        mapRunners.get(position).getLiveSession().getCurrentLocation().getLongitude()),
+                        zoomlevel)));
+            }
+        });
 
+        gridView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(CoachHomePage.this, mapRunners.get(position).getFullName(),Toast.LENGTH_LONG).show();
+                return false;
+            }
+        });
 
     }
 
@@ -145,7 +161,6 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
     private void setUpRV(FirebaseFirestore db){
         db.collection("runners")
                 .whereEqualTo("team", coachDoc.get("team"))
-                .whereEqualTo("online", true)
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
                     public void onEvent(@Nullable QuerySnapshot value,
@@ -169,16 +184,18 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                         //RunnerRVAdapter adapter = new RunnerRVAdapter(runners,CoachHomePage.this);
 
                         CurrentRunnersAdapter adapter = new CurrentRunnersAdapter(runners, CoachHomePage.this);
+
                         if (firsttime == false) {
-                            if (adapter.getCount() != gridView.getAdapter().getCount()) {
                                 //onlineRunnersRV.setAdapter(adapter);
                                 gridView.setAdapter(adapter);
-                            }
                         } else {
                             firsttime = false;
                             //onlineRunnersRV.setAdapter(adapter);
                             gridView.setAdapter(adapter);
                         }
+
+
+
 
 
                         //add and update markers on the map.

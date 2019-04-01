@@ -56,8 +56,12 @@ public class CurrentRunnersAdapter extends BaseAdapter {
             // well set up the ViewHolder
             viewHolder = new ViewHolderItem();
             viewHolder.textViewItem = (TextView) convertView.findViewById(R.id.textView);
-
             viewHolder.imageViewItem = (ImageView) convertView.findViewById(R.id.runner_presence);
+            //viewHolder.findRunnerBtn = convertView.findViewById(R.id.findRunnerBtn);
+
+           // viewHolder.findRunnerBtn.setId(position);
+           // viewHolder.findRunnerBtn.setTag(runners.get(position).getDocumentID());
+
             // store the holder with the view.
             convertView.setTag(viewHolder);
 
@@ -74,7 +78,9 @@ public class CurrentRunnersAdapter extends BaseAdapter {
 
         viewHolder.textViewItem.setTag(position);
         convertView.setBackgroundColor(Color.HSVToColor(new float[] { Integer.parseInt(runners.get(position).getColor()), 1.0f, 1.0f }));
-        viewHolder.imageViewItem.setBackgroundColor(Color.parseColor("#42f450"));
+
+
+        viewHolder.imageViewItem.setBackgroundColor(Color.parseColor((runners.get(position).isOnline() ? "#42f450" : "#FF0000")));
         //viewHolder.imageViewItem.setBackgroundColor(Color.HSVToColor(new float[] { Integer.parseInt(runners.get(position).getColor()), 1.0f, 1.0f }));;
 
         viewHolder.textViewItem.setText(runners.get(position).getFullName());
@@ -85,5 +91,6 @@ public class CurrentRunnersAdapter extends BaseAdapter {
     static class ViewHolderItem {
         TextView textViewItem;
         ImageView imageViewItem;
+        Button findRunnerBtn;
     }
 }
