@@ -84,7 +84,7 @@ public class CurrentRunnersAdapter extends BaseAdapter {
         //viewHolder.imageViewItem.setBackgroundColor(Color.HSVToColor(new float[] { Integer.parseInt(runners.get(position).getColor()), 1.0f, 1.0f }));;
 
         viewHolder.textViewItem.setText(runners.get(position).getFullName());
-        
+
         return convertView;
     }
 
