@@ -19,7 +19,9 @@ import io.grpc.Context;
 public class SessionRVAdapter extends RecyclerView.Adapter<SessionRVAdapter.PersonViewHolder> {
 
     List<CCSession> sessions;
+    static Class<?> callbackClass;
     static Activity activity;
+    static String runnerID;
     public static class PersonViewHolder extends RecyclerView.ViewHolder {
         CardView cv;
         Activity ActivityContext;
@@ -28,6 +30,7 @@ public class SessionRVAdapter extends RecyclerView.Adapter<SessionRVAdapter.Pers
         TextView sessionPace;
         TextView sessionDuration;
         String documentID;
+        String runnerID;
 
         PersonViewHolder(View itemView) {
             super(itemView);
@@ -40,8 +43,9 @@ public class SessionRVAdapter extends RecyclerView.Adapter<SessionRVAdapter.Pers
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent i = new Intent(v.getContext(), SessionView.class);
+                    Intent i = new Intent(v.getContext(), callbackClass);
                     i.putExtra("documentID", documentID);
+                    i.putExtra("runnerID", runnerID);
                     i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     activity.getApplicationContext().startActivity(i);
                 }
@@ -52,9 +56,11 @@ public class SessionRVAdapter extends RecyclerView.Adapter<SessionRVAdapter.Pers
 
     }
 
-    SessionRVAdapter(List<CCSession> sessions, Activity activity){
+    SessionRVAdapter(List<CCSession> sessions, Activity activity, String runnerID, Class<?> cls){
+        this.callbackClass = cls;
         this.sessions = sessions;
         this.activity = activity;
+        this.runnerID = runnerID;
     }
 
     @Override
@@ -76,6 +82,7 @@ public class SessionRVAdapter extends RecyclerView.Adapter<SessionRVAdapter.Pers
         personViewHolder.sessionPace.setText("Pace: " + sessions.get(i).getSessionPace().getPaceString());
         personViewHolder.sessionDuration.setText("Duration: " + sessions.get(i).getSessionDuration());
         personViewHolder.documentID = sessions.get(i).getDocumentID();
+        personViewHolder.runnerID = this.runnerID;
 
 
     }

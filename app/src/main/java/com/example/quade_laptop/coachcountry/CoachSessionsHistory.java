@@ -33,7 +33,7 @@ import java.util.List;
 
 
 
-public class SessionHistory extends AppCompatActivity {
+public class CoachSessionsHistory extends AppCompatActivity {
 
     RecyclerView sessionHistoryRV;
     LinearLayoutManager llm;
@@ -41,28 +41,33 @@ public class SessionHistory extends AppCompatActivity {
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private DrawerLayout mDrawerLayout;
+    private String runnerID;
 
     private List<CCSession> sessionsSummaryList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_session_history);
+        setContentView(R.layout.activity_coach_country_sessions_history);
+
+        Intent i = getIntent();
+
+        runnerID = i.getStringExtra("runnerID");
 
         //Init toolbar
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.c_h_toolbar);
         setSupportActionBar(myToolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
-        NavigationView navigationView = findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.c_h_navbar);
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         switch (menuItem.getItemId()) {
-                            case R.id.mainPage:
-                                startActivity(new Intent(SessionHistory.this, MainActivity.class));
+                            case R.id.coachDashboard:
+                                startActivity(new Intent(CoachSessionsHistory.this, CoachHomePage.class));
                                 finish();
                                 return true;
                         }
@@ -77,13 +82,13 @@ public class SessionHistory extends AppCompatActivity {
                         return true;
                     }
                 });
-        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerLayout = findViewById(R.id.c_h_drawer_layout);
 
 
 
 
 
-        sessionHistoryRV = (RecyclerView)findViewById(R.id.rv);
+        sessionHistoryRV = (RecyclerView)findViewById(R.id.c_h_rv);
         llm = new LinearLayoutManager(getApplicationContext());
         sessionHistoryRV.setLayoutManager(llm);
 
@@ -121,7 +126,7 @@ public class SessionHistory extends AppCompatActivity {
 
     private void getSessionsData(){
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("runners").document(mFirebaseUser.getUid()).collection("sessions").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+        db.collection("runners").document(runnerID).collection("sessions").get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if(task.isSuccessful())
@@ -145,7 +150,7 @@ public class SessionHistory extends AppCompatActivity {
                                     Integer.parseInt(sessionDoc.get("sessionNum").toString())
                             ));
                         }
-                    SessionRVAdapter adapter = new SessionRVAdapter(sessionsSummaryList,SessionHistory.this, mFirebaseUser.getUid(), SessionView.class);
+                    SessionRVAdapter adapter = new SessionRVAdapter(sessionsSummaryList,CoachSessionsHistory.this, runnerID, CoachSessionSummary.class);
                     sessionHistoryRV.setAdapter(adapter);
                 }
             }

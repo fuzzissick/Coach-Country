@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -70,6 +71,7 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
     private FirebaseFunctions mFunctions;
     private String mUsername;
     private DocumentSnapshot coachDoc;
+    private DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,21 +105,45 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         //onlineRunnersRV = (RecyclerView)findViewById(R.id.rv);
         gridView = (GridView)findViewById(R.id.gv);
         llm = new LinearLayoutManager(getApplicationContext());
-        //onlineRunnersRV.setLayoutManager(llm);
+
 
         //Init toolbar
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.c_h_toolbar);
         setSupportActionBar(myToolbar);
         ActionBar actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.drawable.ic_menu_black_24dp);
+
+        //init navbar
+        NavigationView navigationView = findViewById(R.id.c_h_navbar);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        switch (menuItem.getItemId()) {
+                            case R.id.yourRunners:
+                                startActivity(new Intent(CoachHomePage.this, CoachSessionsHistory.class));
+                                finish();
+                                return true;
+                        }
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+
+                        return true;
+                    }
+                });
+        mDrawerLayout = findViewById(R.id.drawer_layout);
 
         // init firestore
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
         final DocumentReference coachDocument = db.collection("coaches").document(mFirebaseUser.getUid().toString());
 
         mapMarkers = new HashMap<>();
-
 
 
         //get the coaching document
@@ -151,6 +177,11 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
             @Override
             public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(CoachHomePage.this, mapRunners.get(position).getFullName(),Toast.LENGTH_LONG).show();
+
+                Intent i = new Intent(CoachHomePage.this, CoachSessionsHistory.class);
+                i.putExtra("runnerID", mapRunners.get(position).getDocumentID());
+                startActivity(i);
+                finish();
                 return false;
             }
         });
@@ -274,9 +305,14 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
             case R.id.sign_out:
                 mFirebaseAuth.signOut();
                 mUsername = ANONYMOUS;
