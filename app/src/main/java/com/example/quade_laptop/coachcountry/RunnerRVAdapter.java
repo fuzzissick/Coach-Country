@@ -41,11 +41,10 @@ public class RunnerRVAdapter extends RecyclerView.Adapter<RunnerRVAdapter.Person
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    Intent i = new Intent(v.getContext(), SessionView.class);
-//                    i.putExtra("documentID", documentID);
-//                    activity.getApplicationContext().startActivity(i);
-
-                    Toast.makeText(v.getContext(), "Click!", Toast.LENGTH_LONG);
+                    Intent i = new Intent(v.getContext(), CoachSessionsHistory.class);
+                    i.putExtra("runnerID", documentID);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    activity.getApplicationContext().startActivity(i);
                 }
             });
 

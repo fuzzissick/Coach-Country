@@ -47,6 +47,7 @@
         </activity>
         <activity android:name=".CoachSessionsHistory"/>
         <activity android:name=".CoachSessionSummary"/>
+        <activity android:name=".CoachViewRunners"/>
     </application>
 
 </manifest>

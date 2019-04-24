@@ -20,7 +20,6 @@
             android:background="?attr/colorPrimary"
             android:elevation="4dp"
             android:theme="@style/AppToolbar"
-            app:layout_constraintBottom_toBottomOf="@+id/c_h_drawer_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -38,32 +37,22 @@
             app:layout_constraintVertical_bias="0.49">
 
             <TextView
-                android:id="@+id/runner_name"
+                android:id="@+id/school_name"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:textAlignment="center"
-                android:textSize="24sp" />
+                android:textSize="24sp"
+                android:textAllCaps="true"
+                />
 
             <TextView
-                android:id="@+id/runner_year"
+                android:id="@+id/runners"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="Runners"
                 android:textAlignment="center"
                 android:textSize="18sp" />
 
-            <TextView
-                android:id="@+id/runner_eventgroup"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textSize="18sp" />
-
-            <TextView
-                android:id="@+id/runner_weeklymileage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textAlignment="center"
-                android:textSize="18sp" />
         </LinearLayout>
 
         <android.support.v7.widget.RecyclerView

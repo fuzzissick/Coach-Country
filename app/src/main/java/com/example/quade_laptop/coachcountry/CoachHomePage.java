@@ -122,9 +122,10 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         switch (menuItem.getItemId()) {
                             case R.id.yourRunners:
-                                startActivity(new Intent(CoachHomePage.this, CoachSessionsHistory.class));
+                                startActivity(new Intent(CoachHomePage.this, CoachViewRunners.class));
                                 finish();
                                 return true;
+
                         }
                         // set item as selected to persist highlight
                         menuItem.setChecked(true);
