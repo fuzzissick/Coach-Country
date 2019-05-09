@@ -46,6 +46,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.functions.FirebaseFunctions;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -233,7 +234,20 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                         //add and update markers on the map.
                         //Currently not what I want it to be, I want the blips to not unfocus and just update the information on them
 
+
+
+
                         for (Runner runner : mapRunners) {
+                            String update;
+                            String title;
+
+                            update = runner.getLiveSession().getPaceOrStatus();
+                            title = runner.getFullName();
+
+                            if(runner.getLiveSession().getRunning() == true){
+                                update = update + " -  D:" + new DecimalFormat("#.00mi").format(runner.getLiveSession().getCurrentDistance());
+                                title = title + " -  T:" + runner.getLiveSession().getCurrentDuration();
+                            }
                             if (mapMarkers.containsKey(runner.getDocumentID())) {
                                 //Update pos
                                 LatLng pos = new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
@@ -241,8 +255,10 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                                 //check if pos changed
                                 if (pos != mapMarkers.get(runner.getDocumentID()).getPosition()) {
                                     mapMarkers.get(runner.getDocumentID()).setPosition(pos);
-                                    mapMarkers.get(runner.getDocumentID()).setSnippet(runner.getLiveSession().getPaceOrStatus());
+                                    mapMarkers.get(runner.getDocumentID()).setTitle(title);
+                                    mapMarkers.get(runner.getDocumentID()).setSnippet(update);
                                     if(mapMarkers.get(runner.getDocumentID()).isInfoWindowShown()){
+                                        mapMarkers.get(runner.getDocumentID()).showInfoWindow();
                                         runningMap.animateCamera((CameraUpdateFactory.newLatLngZoom(pos, zoomlevel)));
                                     }
                                 }
@@ -250,8 +266,8 @@ public class CoachHomePage extends AppCompatActivity implements OnMapReadyCallba
                                 Marker newM = runningMap.addMarker(new MarkerOptions()
                                         .position(new LatLng(runner.getLiveSession().getCurrentLocation().getLatitude(),
                                                 runner.getLiveSession().getCurrentLocation().getLongitude()))
-                                        .title(runner.getFullName())
-                                        .snippet(runner.getLiveSession().getPaceOrStatus())
+                                        .title(title)
+                                        .snippet(update)
                                         .icon(BitmapDescriptorFactory.defaultMarker(Integer.parseInt(runner.getColor())))
                                 );
                                 mapMarkers.put(runner.getDocumentID(), newM);
